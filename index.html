@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate Memory Challenge</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bubblegum+Sans&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #FFB7C3;
+            --secondary-color: #FFC8D1;
+            --background-color: #FFF0F3;
+            --card-color: #E0BBE4;
+            --text-color: #4D4D4D;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Bubblegum Sans', cursive;
+            background: var(--background-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--text-color);
+        }
+
+        .game-container {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            padding: 30px;
+            width: 100%;
+            max-width: 800px;
+            text-align: center;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .game-title {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+            text-shadow: 2px 2px 0 rgba(255, 255, 255, 0.8);
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+            color: var(--secondary-color);
+        }
+
+        .level-select {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .level-btn {
+            background-color: var(--primary-color);
+            color: #FFFFFF;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .level-btn.active,
+        .level-btn:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .game-board {
+            display: grid;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .card {
+            width: 80px;
+            height: 80px;
+            background-color: var(--card-color);
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-size: 2em;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+            color: #FFFFFF;
+        }
+
+        .card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .card.matched {
+            background-color: #957DAD;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .game-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            background-color: var(--primary-color);
+            color: #FFFFFF;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .game-over-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: var(--background-color);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+        }
+
+        @media (max-width: 600px) {
+            .game-title {
+                font-size: 2em;
+            }
+
+            .level-btn {
+                padding: 8px 16px;
+                font-size: 0.9em;
+            }
+
+            .card {
+                width: 60px;
+                height: 60px;
+                font-size: 1.5em;
+            }
+
+            .modal-content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1 class="game-title">Ultimate Memory Challenge</h1>
+        
+        <div class="level-select" id="level-select">
+            <button class="level-btn" data-level="1">Level 1</button>
+            <button class="level-btn" data-level="2">Level 2</button>
+            <button class="level-btn" data-level="3">Level 3</button>
+            <button class="level-btn" data-level="4">Level 4</button>
+            <button class="level-btn" data-level="5">Level 5</button>
+        </div>
+
+        <div class="game-info">
+            <div id="timer">Time: 2:00</div>
+            <div id="score">Score: 0</div>
+        </div>
+
+        <div class="game-board" id="game-board"></div>
+
+        <div class="game-controls">
+            <button id="reset-btn" class="btn">Reset Game</button>
+        </div>
+    </div>
+
+    <div id="game-over-modal" class="game-over-modal">
+        <div class="modal-content">
+            <h2 style="margin-bottom: 20px;">Game Over</h2>
+            <p id="game-result" style="font-size: 1.2em; margin-bottom: 20px;"></p>
+            <button id="play-again-btn" class="btn">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        class UltimateMemoryChallenge {
+            constructor() {
+                this.allEmojis = [
+                    ['🐶', '🐱', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁', '🐷', '🐵', '🐔', '🐧', '🐦', '🐤', '🐺', '🐗', '🐴', '🦄', '🐝', '🦋', '🐌', '🐞', '🐜', '🐚'],
+                    ['🐶', '🐱', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁', '🐷', '🐵', '🐔', '🐧', '🐦', '🐤', '🐺', '🐗', '🐴', '🦄', '🐝', '🦋', '🐌', '🐞', '🐜', '🐚'],
+                    ['🐶', '🐱', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁', '🐷', '🐵', '🐔', '🐧', '🐦', '🐤', '🐺', '🐗', '🐴', '🦄', '🐝', '🦋', '🐌', '🐞', '🐜', '🐚'],
+                    ['🐶', '🐱', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁', '🐷', '🐵', '🐔', '🐧', '🐦', '🐤', '🐺', '🐗', '🐴', '🦄', '🐝', '🦋', '🐌', '🐞', '🐜', '🐚'],
+                    ['🐶', '🐱', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁', '🐷', '🐵', '🐔', '🐧', '🐦', '🐤', '🐺', '🐗', '🐴', '🦄', '🐝', '🦋', '🐌', '🐞', '🐜', '🐚']
+                ];
+
+                this.gameBoard = document.getElementById('game-board');
+                this.timerDisplay = document.getElementById('timer');
+                this.scoreDisplay = document.getElementById('score');
+                this.resetBtn = document.getElementById('reset-btn');
+                this.gameOverModal = document.getElementById('game-over-modal');
+                this.gameResultText = document.getElementById('game-result');
+                this.playAgainBtn = document.getElementById('play-again-btn');
+                this.levelSelect = document.getElementById('level-select');
+
+                this.currentLevel = 1;
+                this.cards = [];
+                this.selectedCards = [];
+                this.matchedPairs = 0;
+                this.score = 0;
+                this.timeLeft = 180;
+                this.timer = null;
+
+                this.init = this.init.bind(this);
+                this.selectCard = this.selectCard.bind(this);
+                this.resetGame = this.resetGame.bind(this);
+                this.endGame = this.endGame.bind(this);
+
+                this.setupEventListeners();
+
+                this.init();
+            }
+
+            setupEventListeners() {
+                this.levelSelect.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('level-btn')) {
+                        this.levelSelect.querySelectorAll('.level-btn').forEach(btn => {
+                            btn.classList.remove('active');
+                        });
+
+                        e.target.classList.add('active');
+
+                        this.currentLevel = parseInt(e.target.dataset.level);
+                        this.resetGame();
+                    }
+                });
+
+                this.resetBtn.addEventListener('click', this.resetGame);
+                this.playAgainBtn.addEventListener('click', this.resetGame);
+            }
+
+            init() {
+                this.gameBoard.innerHTML = '';
+                this.cards = [];
+                this.selectedCards = [];
+                this.matchedPairs = 0;
+                this.score = 0;
+
+                const gridColumns = 5;
+                const timeBase = 120; 
+                this.timeLeft = timeBase;
+
+                this.gameBoard.style.gridTemplateColumns = `repeat(${gridColumns}, 1fr)`;
+
+                const emojiSet = this.allEmojis[this.currentLevel - 1];
+                const pairsToMatch = emojiSet.slice(0, (gridColumns * gridColumns) / 2);
+
+                const gameCards = [...pairsToMatch, ...pairsToMatch]
+                    .sort(() => Math.random() - 0.5);
+
+                gameCards.forEach((emoji, index) => {
+                    const card = document.createElement('div');
+                    card.classList.add('card');
+                    card.dataset.emoji = emoji;
+                    card.dataset.index = index;
+                    card.addEventListener('click', () => this.selectCard(card));
+                    this.cards.push(card);
+                    this.gameBoard.appendChild(card);
+                });
+
+                this.scoreDisplay.textContent = `Score: ${this.score}`;
+                this.updateTimerDisplay();
+
+                this.startTimer();
+
+                this.levelSelect.querySelector(`.level-btn[data-level="${this.currentLevel}"]`).classList.add('active');
+            }
+
+            startTimer() {
+                if (this.timer) clearInterval(this.timer);
+
+                this.timer = setInterval(() => {
+                    this.timeLeft--;
+                    this.updateTimerDisplay();
+
+                    if (this.timeLeft <= 0) {
+                        this.endGame(false);
+                    }
+                }, 1000);
+            }
+
+            updateTimerDisplay() {
+                const minutes = Math.floor(this.timeLeft / 60);
+                const seconds = this.timeLeft % 60;
+                this.timerDisplay.textContent = `Time: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+            }
+
+            selectCard(card) {
+    if (card.classList.contains('matched') || 
+        this.selectedCards.includes(card)) return;
+
+    card.textContent = card.dataset.emoji;
+    this.selectedCards.push(card);
+
+    if (this.selectedCards.length === 2) {
+        if (this.selectedCards[0].dataset.emoji === 
+            this.selectedCards[1].dataset.emoji) {
+            this.matchCards();
+        } else {
+            this.hideCards();
+        }
+    }
+
+    const pairsToMatch = (5 * 5) / 2;
+    if (this.matchedPairs === pairsToMatch) {
+        this.endGame(true);
+    }
+}
+
+matchCards() {
+    this.selectedCards.forEach(card => {
+        card.classList.add('matched');
+    });
+    this.matchedPairs++;
+    
+    const scoreMultiplier = 50;
+    this.score += scoreMultiplier;
+    this.scoreDisplay.textContent = `Score: ${this.score}`;
+    
+    this.selectedCards = [];
+}
+
+hideCards() {
+    setTimeout(() => {
+        this.selectedCards.forEach(card => {
+            if (!card.classList.contains('matched')) {
+                card.textContent = '';
+            }
+        });
+        this.selectedCards = [];
+    }, 1000);
+}
+
+endGame(won) {
+    clearInterval(this.timer);
+
+    this.gameOverModal.style.display = 'flex';
+
+    if (won) {
+        this.gameResultText.textContent = `Congratulations! 🎉
+        Level ${this.currentLevel} Completed!
+        Score: ${this.score} points
+        Time Left: ${Math.floor(this.timeLeft / 60)}:${this.timeLeft % 60 < 10 ? '0' : ''}${this.timeLeft % 60}
+        Congratulations on completing the game!`;
+    } else {
+        this.gameResultText.textContent = `Time's up! ⏰
+        Game Over. Final Score: ${this.score} points`;
+    }
+}
+
+resetGame() {
+    this.gameOverModal.style.display = 'none';
+    
+    this.init();
+}
+}
+
+new UltimateMemoryChallenge();
+</script>
+</body>
+</html>
+</parameter>
+</invoke>

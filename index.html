@@ -7,11 +7,14 @@
     <link href="https://fonts.googleapis.com/css2?family=Bubblegum+Sans&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #FFB7C3;
-            --secondary-color: #FFC8D1;
-            --background-color: #FFF0F3;
+            --primary-color: #FF85A2;
+            --secondary-color: #FFC2D1;
+            --background-color: #FFF0F5;
             --card-color: #E0BBE4;
+            --card-back: #957DAD;
             --text-color: #4D4D4D;
+            --success-color: #A0E7E5;
+            --locked-color: #B5B5B5;
         }
 
         * {
@@ -23,6 +26,7 @@
         body {
             font-family: 'Bubblegum Sans', cursive;
             background: var(--background-color);
+            background-image: url("data:image/svg+xml,%3Csvg width='52' height='26' viewBox='0 0 52 26' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ff85a2' fill-opacity='0.1'%3E%3Cpath d='M10 10c0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6h2c0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4v2c-3.314 0-6-2.686-6-6 0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6zm25.464-1.95l8.486 8.486-1.414 1.414-8.486-8.486 1.414-1.414z' /%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
             display: flex;
             justify-content: center;
             align-items: center;
@@ -32,13 +36,33 @@
         }
 
         .game-container {
-            background-color: rgba(255, 255, 255, 0.9);
+            background-color: rgba(255, 255, 255, 0.95);
             border-radius: 20px;
             padding: 30px;
             width: 100%;
             max-width: 800px;
             text-align: center;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-container::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 8px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--success-color), var(--card-color));
+            background-size: 300% 100%;
+            animation: gradient-slide 5s ease infinite;
+        }
+
+        @keyframes gradient-slide {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
         .game-title {
@@ -46,6 +70,22 @@
             margin-bottom: 20px;
             color: var(--primary-color);
             text-shadow: 2px 2px 0 rgba(255, 255, 255, 0.8);
+            position: relative;
+            display: inline-block;
+        }
+
+        .game-title::after {
+            content: "🧠";
+            position: absolute;
+            font-size: 0.6em;
+            right: -35px;
+            top: 0;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
         }
 
         .game-info {
@@ -53,7 +93,11 @@
             justify-content: space-between;
             margin-bottom: 20px;
             font-size: 1.2em;
-            color: var(--secondary-color);
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 50px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
         .level-select {
@@ -68,55 +112,125 @@
             background-color: var(--primary-color);
             color: #FFFFFF;
             border: none;
-            padding: 10px 20px;
-            border-radius: 10px;
+            padding: 10px 0;
+            width: 80px;
+            border-radius: 50px;
             cursor: pointer;
             transition: all 0.3s ease;
             font-weight: bold;
+            font-family: inherit;
             box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .level-btn.locked {
+            background-color: var(--locked-color);
+            cursor: not-allowed;
+        }
+
+        .level-btn.locked::after {
+            content: "🔒";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.2em;
         }
 
         .level-btn.active,
-        .level-btn:hover {
+        .level-btn:not(.locked):hover {
             background-color: var(--secondary-color);
             transform: translateY(-3px);
             box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
         }
 
+        .level-btn.completed::before {
+            content: "✓";
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: var(--success-color);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
         .game-board {
             display: grid;
+            grid-template-columns: repeat(4, 1fr);
             gap: 10px;
             justify-content: center;
+            perspective: 1000px;
+            margin: 0 auto;
+            max-width: 400px;
         }
 
         .card {
             width: 80px;
             height: 80px;
-            background-color: var(--card-color);
+            background-color: var(--card-back);
             border-radius: 10px;
             display: flex;
             justify-content: center;
             align-items: center;
             cursor: pointer;
             font-size: 2em;
-            transition: all 0.3s ease;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
             box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
-            color: #FFFFFF;
+            position: relative;
+            margin: 0 auto;
         }
 
-        .card:hover {
-            transform: scale(1.05);
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
         }
 
-        .card.matched {
-            background-color: #957DAD;
+        .card.flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .card-front {
+            background-color: var(--card-color);
+            transform: rotateY(180deg);
+        }
+
+        .card-back {
+            background-color: var(--card-back);
+            background-image: url("data:image/svg+xml,%3Csvg width='52' height='26' viewBox='0 0 52 26' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.2'%3E%3Cpath d='M10 10c0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6h2c0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4v2c-3.314 0-6-2.686-6-6 0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6zm25.464-1.95l8.486 8.486-1.414 1.414-8.486-8.486 1.414-1.414z' /%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .card.matched .card-front {
+            background-color: var(--success-color);
             animation: pulse 1s infinite;
         }
 
         @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
+            0%, 100% { transform: scale(1) rotateY(180deg); }
+            50% { transform: scale(1.05) rotateY(180deg); }
         }
 
         .game-controls {
@@ -131,9 +245,10 @@
             color: #FFFFFF;
             border: none;
             padding: 12px 25px;
-            border-radius: 10px;
+            border-radius: 50px;
             cursor: pointer;
             font-weight: bold;
+            font-family: inherit;
             transition: all 0.3s ease;
             box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
         }
@@ -142,6 +257,10 @@
             background-color: var(--secondary-color);
             transform: translateY(-3px);
             box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-icon {
+            margin-right: 5px;
         }
 
         .game-over-modal {
@@ -165,6 +284,146 @@
             max-width: 500px;
             width: 90%;
             box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .modal-content::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 8px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--success-color), var(--card-color));
+            background-size: 300% 100%;
+            animation: gradient-slide 5s ease infinite;
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #f00;
+            animation: confetti-fall 5s ease-in-out infinite;
+        }
+
+        @keyframes confetti-fall {
+            0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(1000px) rotate(720deg); opacity: 0; }
+        }
+
+        #stars-container {
+            display: flex;
+            justify-content: center;
+            margin: 10px 0;
+            min-height: 40px;
+        }
+
+        .star {
+            font-size: 1.5em;
+            margin: 0 5px;
+            color: #FFD700;
+            transform: scale(0);
+            transition: transform 0.3s ease;
+        }
+
+        .star.active {
+            transform: scale(1);
+            animation: star-pulse 1s infinite;
+        }
+
+        @keyframes star-pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        .hint-counter {
+            position: relative;
+            display: inline-block;
+        }
+
+        .hint-counter-number {
+            position: absolute;
+            top: -5px;
+            right: -10px;
+            background-color: var(--secondary-color);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .countdown {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 5em;
+            z-index: 1001;
+        }
+
+        .stats-container {
+            display: flex;
+            justify-content: space-around;
+            margin: 15px 0;
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.5);
+            border-radius: 10px;
+        }
+
+        .stat-box {
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.8em;
+            color: var(--secondary-color);
+        }
+
+        .stat-value {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .progress-container {
+            height: 10px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--success-color));
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .message-box {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--primary-color);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
 
         @media (max-width: 600px) {
@@ -173,7 +432,8 @@
             }
 
             .level-btn {
-                padding: 8px 16px;
+                padding: 8px 0;
+                width: 60px;
                 font-size: 0.9em;
             }
 
@@ -194,218 +454,577 @@
         <h1 class="game-title">Ultimate Memory Challenge</h1>
         
         <div class="level-select" id="level-select">
-            <button class="level-btn" data-level="1">Level 1</button>
-            <button class="level-btn" data-level="2">Level 2</button>
-            <button class="level-btn" data-level="3">Level 3</button>
-            <button class="level-btn" data-level="4">Level 4</button>
-            <button class="level-btn" data-level="5">Level 5</button>
+            <button class="level-btn active" data-level="1">Level 1</button>
+            <button class="level-btn locked" data-level="2">Level 2</button>
+            <button class="level-btn locked" data-level="3">Level 3</button>
+            <button class="level-btn locked" data-level="4">Level 4</button>
+            <button class="level-btn locked" data-level="5">Level 5</button>
         </div>
 
         <div class="game-info">
-            <div id="timer">Time: 2:00</div>
-            <div id="score">Score: 0</div>
+            <div id="timer">⏱️ 02:00</div>
+            <div id="score">🏆 Score: 0</div>
+            <div class="hint-counter">
+                💡 <span id="hint-count">3</span>
+            </div>
+        </div>
+        
+        <div class="stats-container">
+            <div class="stat-box">
+                <div class="stat-label">MOVES</div>
+                <div class="stat-value" id="moves-counter">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">PAIRS</div>
+                <div class="stat-value"><span id="pairs-found">0</span>/<span id="total-pairs">8</span></div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">PROGRESS</div>
+                <div class="progress-container">
+                    <div class="progress-bar" id="progress-bar"></div>
+                </div>
+            </div>
         </div>
 
         <div class="game-board" id="game-board"></div>
 
         <div class="game-controls">
-            <button id="reset-btn" class="btn">Reset Game</button>
+            <button id="hint-btn" class="btn"><span class="btn-icon">💡</span> Hint</button>
+            <button id="reset-btn" class="btn"><span class="btn-icon">🔄</span> Reset</button>
         </div>
     </div>
 
     <div id="game-over-modal" class="game-over-modal">
         <div class="modal-content">
-            <h2 style="margin-bottom: 20px;">Game Over</h2>
+            <h2 style="margin-bottom: 20px;" id="result-title">Game Over</h2>
+            <div id="stars-container">
+                <div class="star">⭐</div>
+                <div class="star">⭐</div>
+                <div class="star">⭐</div>
+            </div>
             <p id="game-result" style="font-size: 1.2em; margin-bottom: 20px;"></p>
-            <button id="play-again-btn" class="btn">Play Again</button>
+            <div id="next-level-container" style="display: none; margin-bottom: 15px;">
+                <button id="next-level-btn" class="btn"><span class="btn-icon">🚀</span> Next Level</button>
+            </div>
+            <button id="play-again-btn" class="btn"><span class="btn-icon">🎮</span> Play Again</button>
         </div>
     </div>
 
+    <div id="countdown" class="countdown" style="display: none;">
+        <div id="countdown-number"></div>
+    </div>
+
+    <div id="message-box" class="message-box"></div>
     <script>
         class UltimateMemoryChallenge {
             constructor() {
-                this.allEmojis = [
-                    ['🐶', '🐱', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁', '🐷', '🐵', '🐔', '🐧', '🐦', '🐤', '🐺', '🐗', '🐴', '🦄', '🐝', '🦋', '🐌', '🐞', '🐜', '🐚'],
-                    ['🐶', '🐱', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁', '🐷', '🐵', '🐔', '🐧', '🐦', '🐤', '🐺', '🐗', '🐴', '🦄', '🐝', '🦋', '🐌', '🐞', '🐜', '🐚'],
-                    ['🐶', '🐱', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁', '🐷', '🐵', '🐔', '🐧', '🐦', '🐤', '🐺', '🐗', '🐴', '🦄', '🐝', '🦋', '🐌', '🐞', '🐜', '🐚'],
-                    ['🐶', '🐱', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁', '🐷', '🐵', '🐔', '🐧', '🐦', '🐤', '🐺', '🐗', '🐴', '🦄', '🐝', '🦋', '🐌', '🐞', '🐜', '🐚'],
-                    ['🐶', '🐱', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁', '🐷', '🐵', '🐔', '🐧', '🐦', '🐤', '🐺', '🐗', '🐴', '🦄', '🐝', '🦋', '🐌', '🐞', '🐜', '🐚']
+                // Emoji themes per level
+                this.emojiThemes = [
+                    ['🐶', '🐱', '🦊', '🐰', '🐻', '🐼', '🐨', '🐯'], // Level 1: Cute animals
+                    ['🦁', '🐘', '🦒', '🦓', '🦍', '🦛', '🦏', '🐪'], // Level 2: Safari animals
+                    ['🐙', '🦑', '🐬', '🐳', '🦈', '🐠', '🐡', '🦞'], // Level 3: Sea creatures
+                    ['🦜', '🦚', '🦃', '🦆', '🦅', '🦉', '🦢', '🦩'], // Level 4: Birds
+                    ['🐝', '🦋', '🐌', '🐞', '🦗', '🕷️', '🦂', '🦟']  // Level 5: Insects
                 ];
-
+    
+                // Funny encouragement messages
+                this.messages = [
+                    "You're doing great! 🌟",
+                    "What a memory you have! 🧠",
+                    "Keep it up, memory master! 💪",
+                    "You're crushing this! 🔥",
+                    "Wow, impressive match! ✨",
+                    "You're on fire! 🔥",
+                    "That's the way! 👏",
+                    "Amazing memory skills! 🏆"
+                ];
+    
+                // Level descriptions and requirements
+                this.levelDetails = [
+                    { name: "Puppy Palooza", requiredScore: 0, timeLimit: 120, description: "Find the cute animal pairs!" },
+                    { name: "Safari Adventure", requiredScore: 500, timeLimit: 110, description: "Explore the savanna with safari animals!" },
+                    { name: "Ocean Odyssey", requiredScore: 1000, timeLimit: 100, description: "Dive deep with sea creatures!" },
+                    { name: "Feathered Friends", requiredScore: 1500, timeLimit: 90, description: "Soar high with beautiful birds!" },
+                    { name: "Buggy Bonanza", requiredScore: 2000, timeLimit: 80, description: "Creepy crawlies challenge!" }
+                ];
+    
+                // DOM elements
                 this.gameBoard = document.getElementById('game-board');
                 this.timerDisplay = document.getElementById('timer');
                 this.scoreDisplay = document.getElementById('score');
                 this.resetBtn = document.getElementById('reset-btn');
+                this.hintBtn = document.getElementById('hint-btn');
+                this.hintCountDisplay = document.getElementById('hint-count');
                 this.gameOverModal = document.getElementById('game-over-modal');
                 this.gameResultText = document.getElementById('game-result');
+                this.resultTitle = document.getElementById('result-title');
                 this.playAgainBtn = document.getElementById('play-again-btn');
+                this.nextLevelBtn = document.getElementById('next-level-btn');
+                this.nextLevelContainer = document.getElementById('next-level-container');
                 this.levelSelect = document.getElementById('level-select');
-
+                this.movesCounter = document.getElementById('moves-counter');
+                this.pairsFound = document.getElementById('pairs-found');
+                this.totalPairs = document.getElementById('total-pairs');
+                this.progressBar = document.getElementById('progress-bar');
+                this.countdownElement = document.getElementById('countdown');
+                this.countdownNumber = document.getElementById('countdown-number');
+                this.messageBox = document.getElementById('message-box');
+                this.starsContainer = document.getElementById('stars-container');
+    
+                // Game state
                 this.currentLevel = 1;
                 this.cards = [];
                 this.selectedCards = [];
                 this.matchedPairs = 0;
                 this.score = 0;
-                this.timeLeft = 180;
+                this.moves = 0;
+                this.timeLeft = 120;
                 this.timer = null;
-
+                this.hintsLeft = 3;
+                this.lastHintedCards = [];
+                this.unlockedLevels = [1];
+                this.showingAllCards = false;
+    
+                // Load game state from localStorage if available
+                this.loadGameState();
+    
+                // Bind methods
                 this.init = this.init.bind(this);
                 this.selectCard = this.selectCard.bind(this);
                 this.resetGame = this.resetGame.bind(this);
                 this.endGame = this.endGame.bind(this);
-
+                this.showHint = this.showHint.bind(this);
+                this.startNextLevel = this.startNextLevel.bind(this);
+    
+                // Setup event listeners
                 this.setupEventListeners();
-
+    
+                // Initialize game
                 this.init();
             }
-
+    
             setupEventListeners() {
                 this.levelSelect.addEventListener('click', (e) => {
-                    if (e.target.classList.contains('level-btn')) {
+                    if (e.target.classList.contains('level-btn') && !e.target.classList.contains('locked')) {
                         this.levelSelect.querySelectorAll('.level-btn').forEach(btn => {
                             btn.classList.remove('active');
                         });
-
+    
                         e.target.classList.add('active');
-
+    
                         this.currentLevel = parseInt(e.target.dataset.level);
                         this.resetGame();
+                    } else if (e.target.classList.contains('locked')) {
+                        this.showMessage(`Complete previous levels to unlock this!`);
                     }
                 });
-
+    
                 this.resetBtn.addEventListener('click', this.resetGame);
                 this.playAgainBtn.addEventListener('click', this.resetGame);
+                this.nextLevelBtn.addEventListener('click', this.startNextLevel);
+                this.hintBtn.addEventListener('click', this.showHint);
             }
-
+    
             init() {
                 this.gameBoard.innerHTML = '';
                 this.cards = [];
                 this.selectedCards = [];
                 this.matchedPairs = 0;
-                this.score = 0;
-
-                const gridColumns = 5;
-                const timeBase = 120; 
-                this.timeLeft = timeBase;
-
-                this.gameBoard.style.gridTemplateColumns = `repeat(${gridColumns}, 1fr)`;
-
-                const emojiSet = this.allEmojis[this.currentLevel - 1];
-                const pairsToMatch = emojiSet.slice(0, (gridColumns * gridColumns) / 2);
-
-                const gameCards = [...pairsToMatch, ...pairsToMatch]
-                    .sort(() => Math.random() - 0.5);
-
+                this.moves = 0;
+                this.showingAllCards = false;
+    
+                const gridSize = 4; // 4x4 grid as requested
+                const totalCards = gridSize * gridSize;
+                const totalPairs = totalCards / 2;
+                this.timeLeft = this.levelDetails[this.currentLevel - 1].timeLimit;
+    
+                this.hintsLeft = 3;
+                this.hintCountDisplay.textContent = this.hintsLeft;
+                this.movesCounter.textContent = this.moves;
+                this.pairsFound.textContent = this.matchedPairs;
+                this.totalPairs.textContent = totalPairs;
+                this.progressBar.style.width = '0%';
+    
+                const emojiSet = this.emojiThemes[this.currentLevel - 1];
+                const gameCards = [...emojiSet, ...emojiSet].sort(() => Math.random() - 0.5);
+    
                 gameCards.forEach((emoji, index) => {
                     const card = document.createElement('div');
                     card.classList.add('card');
+                    card.innerHTML = `
+                        <div class="card-inner">
+                            <div class="card-front">${emoji}</div>
+                            <div class="card-back">?</div>
+                        </div>
+                    `;
                     card.dataset.emoji = emoji;
                     card.dataset.index = index;
                     card.addEventListener('click', () => this.selectCard(card));
                     this.cards.push(card);
                     this.gameBoard.appendChild(card);
                 });
-
-                this.scoreDisplay.textContent = `Score: ${this.score}`;
+    
+                this.scoreDisplay.textContent = `🏆 Score: ${this.score}`;
                 this.updateTimerDisplay();
-
-                this.startTimer();
-
-                this.levelSelect.querySelector(`.level-btn[data-level="${this.currentLevel}"]`).classList.add('active');
+    
+                // Show the preview of all cards for 5 seconds
+                this.showAllCards();
+    
+                // Update level buttons display
+                this.updateLevelButtons();
             }
-
+    
+            showAllCards() {
+                this.showingAllCards = true;
+                // Display countdown
+                this.countdownElement.style.display = 'flex';
+                
+                // Start countdown from 5
+                let countdown = 5;
+                this.countdownNumber.textContent = countdown;
+                
+                // Flip all cards to show them
+                this.cards.forEach(card => {
+                    card.classList.add('flipped');
+                });
+                
+                const countdownInterval = setInterval(() => {
+                    countdown--;
+                    this.countdownNumber.textContent = countdown;
+                    
+                    if (countdown <= 0) {
+                        clearInterval(countdownInterval);
+                        this.countdownElement.style.display = 'none';
+                        
+                        // Flip all cards back
+                        setTimeout(() => {
+                            this.cards.forEach(card => {
+                                if (!card.classList.contains('matched')) {
+                                    card.classList.remove('flipped');
+                                }
+                            });
+                            this.showingAllCards = false;
+                            // Start the game timer after preview
+                            this.startTimer();
+                        }, 500);
+                    }
+                }, 1000);
+            }
+    
+            updateLevelButtons() {
+                const levelBtns = this.levelSelect.querySelectorAll('.level-btn');
+                
+                levelBtns.forEach((btn, index) => {
+                    const level = index + 1;
+                    
+                    // Clear all classes first except level-btn
+                    btn.classList.remove('active', 'locked', 'completed');
+                    
+                    if (level === this.currentLevel) {
+                        btn.classList.add('active');
+                    }
+                    
+                    if (!this.unlockedLevels.includes(level)) {
+                        btn.classList.add('locked');
+                    }
+                    
+                    if (this.unlockedLevels.includes(level) && level < this.currentLevel) {
+                        btn.classList.add('completed');
+                    }
+                });
+            }
+    
             startTimer() {
                 if (this.timer) clearInterval(this.timer);
-
+    
                 this.timer = setInterval(() => {
                     this.timeLeft--;
                     this.updateTimerDisplay();
-
+    
                     if (this.timeLeft <= 0) {
                         this.endGame(false);
                     }
                 }, 1000);
             }
-
+    
             updateTimerDisplay() {
                 const minutes = Math.floor(this.timeLeft / 60);
                 const seconds = this.timeLeft % 60;
-                this.timerDisplay.textContent = `Time: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+                this.timerDisplay.textContent = `⏱️ ${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
             }
-
+    
             selectCard(card) {
-    if (card.classList.contains('matched') || 
-        this.selectedCards.includes(card)) return;
-
-    card.textContent = card.dataset.emoji;
-    this.selectedCards.push(card);
-
-    if (this.selectedCards.length === 2) {
-        if (this.selectedCards[0].dataset.emoji === 
-            this.selectedCards[1].dataset.emoji) {
-            this.matchCards();
-        } else {
-            this.hideCards();
-        }
-    }
-
-    const pairsToMatch = (5 * 5) / 2;
-    if (this.matchedPairs === pairsToMatch) {
-        this.endGame(true);
-    }
-}
-
-matchCards() {
-    this.selectedCards.forEach(card => {
-        card.classList.add('matched');
-    });
-    this.matchedPairs++;
+                // Don't allow card selection during preview or if already matched/selected
+                if (this.showingAllCards || 
+                    card.classList.contains('matched') || 
+                    this.selectedCards.includes(card)) return;
     
-    const scoreMultiplier = 50;
-    this.score += scoreMultiplier;
-    this.scoreDisplay.textContent = `Score: ${this.score}`;
+                this.moves++;
+                this.movesCounter.textContent = this.moves;
     
-    this.selectedCards = [];
-}
-
-hideCards() {
-    setTimeout(() => {
-        this.selectedCards.forEach(card => {
-            if (!card.classList.contains('matched')) {
-                card.textContent = '';
+                card.classList.add('flipped');
+                this.selectedCards.push(card);
+    
+                if (this.selectedCards.length === 2) {
+                    if (this.selectedCards[0].dataset.emoji === this.selectedCards[1].dataset.emoji) {
+                        this.matchCards();
+                        this.showRandomMessage();
+                    } else {
+                        this.hideCards();
+                    }
+    
+                    // Update the progress bar
+                    const totalPairs = this.emojiThemes[this.currentLevel - 1].length;
+                    const progress = (this.matchedPairs / totalPairs) * 100;
+                    this.progressBar.style.width = `${progress}%`;
+    
+                    // Check if all pairs are matched
+                    if (this.matchedPairs === totalPairs) {
+                        this.endGame(true);
+                    }
+                }
             }
-        });
-        this.selectedCards = [];
-    }, 1000);
-}
-
-endGame(won) {
-    clearInterval(this.timer);
-
-    this.gameOverModal.style.display = 'flex';
-
-    if (won) {
-        this.gameResultText.textContent = `Congratulations! 🎉
-        Level ${this.currentLevel} Completed!
-        Score: ${this.score} points
-        Time Left: ${Math.floor(this.timeLeft / 60)}:${this.timeLeft % 60 < 10 ? '0' : ''}${this.timeLeft % 60}
-        Congratulations on completing the game!`;
-    } else {
-        this.gameResultText.textContent = `Time's up! ⏰
-        Game Over. Final Score: ${this.score} points`;
-    }
-}
-
-resetGame() {
-    this.gameOverModal.style.display = 'none';
     
-    this.init();
-}
-}
-
-new UltimateMemoryChallenge();
-</script>
-</body>
-</html>
-</parameter>
-</invoke>
+            matchCards() {
+                this.selectedCards.forEach(card => {
+                    card.classList.add('matched');
+                });
+                
+                this.matchedPairs++;
+                this.pairsFound.textContent = this.matchedPairs;
+                
+                // Calculate score based on level and time left
+                const baseScore = 50 * this.currentLevel;
+                const timeBonus = Math.floor(this.timeLeft / 5);
+                const movesPenalty = Math.max(0, 20 - this.moves);
+                const pairScore = baseScore + timeBonus + movesPenalty;
+                
+                this.score += pairScore;
+                this.scoreDisplay.textContent = `🏆 Score: ${this.score}`;
+                
+                this.selectedCards = [];
+            }
+    
+            hideCards() {
+                setTimeout(() => {
+                    this.selectedCards.forEach(card => {
+                        if (!card.classList.contains('matched')) {
+                            card.classList.remove('flipped');
+                        }
+                    });
+                    this.selectedCards = [];
+                }, 1000);
+            }
+    
+            showHint() {
+                if (this.hintsLeft <= 0) {
+                    this.showMessage("No hints left!");
+                    return;
+                }
+    
+                // Clear any previous hints
+                this.lastHintedCards.forEach(card => {
+                    card.style.boxShadow = '';
+                });
+                this.lastHintedCards = [];
+    
+                // Find unmatched cards
+                const unmatchedCards = this.cards.filter(card => !card.classList.contains('matched') && !card.classList.contains('flipped'));
+                
+                if (unmatchedCards.length < 2) return;
+    
+                // Find a matching pair
+                const emojis = {};
+                unmatchedCards.forEach(card => {
+                    const emoji = card.dataset.emoji;
+                    if (!emojis[emoji]) {
+                        emojis[emoji] = [card];
+                    } else {
+                        emojis[emoji].push(card);
+                    }
+                });
+    
+                // Get the first matching pair
+                let hintPair = null;
+                for (const emoji in emojis) {
+                    if (emojis[emoji].length === 2) {
+                        hintPair = emojis[emoji];
+                        break;
+                    }
+                }
+    
+                if (hintPair) {
+                    // Highlight the cards
+                    hintPair.forEach(card => {
+                        card.style.boxShadow = '0 0 15px 5px #FFD700';
+                        this.lastHintedCards.push(card);
+                    });
+    
+                    this.hintsLeft--;
+                    this.hintCountDisplay.textContent = this.hintsLeft;
+    
+                    // Remove highlight after 2 seconds
+                    setTimeout(() => {
+                        hintPair.forEach(card => {
+                            card.style.boxShadow = '';
+                        });
+                    }, 2000);
+                } else {
+                    this.showMessage("No matching pairs found!");
+                }
+            }
+    
+            startNextLevel() {
+                if (this.currentLevel < 5) {
+                    this.currentLevel++;
+                    this.gameOverModal.style.display = 'none';
+                    this.resetGame();
+                } else {
+                    this.showMessage("You've completed all levels! Amazing!");
+                }
+            }
+    
+            showRandomMessage() {
+                // Show a random encouragement message
+                const randomIndex = Math.floor(Math.random() * this.messages.length);
+                this.showMessage(this.messages[randomIndex]);
+            }
+    
+            showMessage(text) {
+                this.messageBox.textContent = text;
+                this.messageBox.style.opacity = '1';
+                
+                setTimeout(() => {
+                    this.messageBox.style.opacity = '0';
+                }, 2000);
+            }
+            
+            updateStarsDisplay(stars) {
+                // Reset stars
+                const starElements = this.starsContainer.querySelectorAll('.star');
+                starElements.forEach(star => {
+                    star.classList.remove('active');
+                });
+                
+                // Activate earned stars with delay for animation
+                for (let i = 0; i < stars; i++) {
+                    setTimeout(() => {
+                        starElements[i].classList.add('active');
+                    }, i * 300);
+                }
+            }
+    
+            createConfetti() {
+                const confettiCount = 100;
+                const colors = ['#FF85A2', '#FFC2D1', '#A0E7E5', '#E0BBE4', '#957DAD'];
+                
+                for (let i = 0; i < confettiCount; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = `${Math.random() * 100}%`;
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.width = `${Math.random() * 10 + 5}px`;
+                    confetti.style.height = `${Math.random() * 10 + 5}px`;
+                    confetti.style.animationDuration = `${Math.random() * 3 + 2}s`;
+                    confetti.style.animationDelay = `${Math.random() * 2}s`;
+                    
+                    this.gameOverModal.appendChild(confetti);
+                    
+                    // Remove after animation completes
+                    setTimeout(() => {
+                        confetti.remove();
+                    }, 5000);
+                }
+            }
+    
+            endGame(won) {
+                clearInterval(this.timer);
+                this.gameOverModal.style.display = 'flex';
+    
+                // Calculate stars based on time left and moves
+                let stars = 1;
+                const totalTime = this.levelDetails[this.currentLevel - 1].timeLimit;
+                const totalPairs = this.emojiThemes[this.currentLevel - 1].length;
+                
+                if (won) {
+                    if (this.timeLeft > totalTime * 0.5 && this.moves < totalPairs * 3) {
+                        stars = 3;
+                    } else if (this.timeLeft > totalTime * 0.3 || this.moves < totalPairs * 4) {
+                        stars = 2;
+                    }
+                    
+                    this.createConfetti();
+                    this.resultTitle.textContent = "Level Complete!";
+                    this.gameResultText.innerHTML = `
+                        <div style="margin-bottom: 10px; font-size: 1.2em">🎉 ${this.levelDetails[this.currentLevel - 1].name} 🎉</div>
+                        <p style="margin-bottom: 15px">${stars === 3 ? "Perfect! You're a memory master!" : stars === 2 ? "Great job!" : "Well done!"}</p>
+                        <div style="background-color: rgba(255,255,255,0.5); padding: 10px; border-radius: 10px; margin-bottom: 15px">
+                            <div>Score: ${this.score} points</div>
+                            <div>Time Left: ${Math.floor(this.timeLeft / 60)}:${this.timeLeft % 60 < 10 ? '0' : ''}${this.timeLeft % 60}</div>
+                            <div>Moves: ${this.moves}</div>
+                        </div>
+                    `;
+                    
+                    // Update unlocked levels if current level is completed
+                    if (!this.unlockedLevels.includes(this.currentLevel + 1) && this.currentLevel < 5) {
+                        this.unlockedLevels.push(this.currentLevel + 1);
+                        this.saveGameState();
+                    }
+                    
+                    // Show next level button if not on the last level
+                    if (this.currentLevel < 5) {
+                        this.nextLevelContainer.style.display = 'block';
+                    } else {
+                        this.nextLevelContainer.style.display = 'none';
+                        this.gameResultText.innerHTML += `<p style="margin-top: 10px; font-weight: bold; color: #FF85A2">Congratulations! You've completed all levels! 🏆</p>`;
+                    }
+                } else {
+                    this.resultTitle.textContent = "Game Over";
+                    this.gameResultText.innerHTML = `
+                        <div style="margin-bottom: 10px;">Time's up! ⏰</div>
+                        <p>Don't worry, you can try again!</p>
+                        <div style="background-color: rgba(255,255,255,0.5); padding: 10px; border-radius: 10px; margin: 15px 0;">
+                            <div>Final Score: ${this.score} points</div>
+                            <div>Pairs Found: ${this.matchedPairs}/${totalPairs}</div>
+                        </div>
+                    `;
+                    
+                    this.nextLevelContainer.style.display = 'none';
+                }
+                
+                this.updateStarsDisplay(stars);
+            }
+    
+            loadGameState() {
+                const savedState = localStorage.getItem('memoryGameState');
+                if (savedState) {
+                    const state = JSON.parse(savedState);
+                    this.score = state.score || 0;
+                    this.unlockedLevels = state.unlockedLevels || [1];
+                }
+            }
+    
+            saveGameState() {
+                const state = {
+                    score: this.score,
+                    unlockedLevels: this.unlockedLevels
+                };
+                localStorage.setItem('memoryGameState', JSON.stringify(state));
+            }
+    
+            resetGame() {
+                this.gameOverModal.style.display = 'none';
+                
+                const confetti = document.querySelectorAll('.confetti');
+                confetti.forEach(c => c.remove());
+                
+                this.init();
+            }
+        }
+    
+        document.addEventListener('DOMContentLoaded', () => {
+            new UltimateMemoryChallenge();
+        });
+        
+        new UltimateMemoryChallenge();
+    </script>
